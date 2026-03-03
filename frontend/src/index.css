@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Train animations */
+@keyframes trainLine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100vw); }
+}
+
+@keyframes trainMove {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(100vw); }
+}
+
+.animate-train-line {
+  animation: trainLine 20s linear infinite;
+}
+
+.animate-train-move {
+  animation: trainMove 15s linear infinite;
+}
+
+
+.railway-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23f59e0b' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+}
+
+
+.input {
+  @apply w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-600 text-white
+         focus:outline-none focus:border-amber-500;
+}
+
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  scrollbar-width: none;
+}
