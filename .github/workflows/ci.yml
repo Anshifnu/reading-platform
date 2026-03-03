@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI-CD Pipeline
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  build-test-and-deploy:
     runs-on: ubuntu-latest
 
     services:
@@ -19,9 +19,22 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
 
     steps:
+      # ========================
+      # Checkout Code
+      # ========================
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -31,10 +44,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
-
-      - name: Check Python Version
-        run: python --version
+          python-version: "3.12"
 
       - name: Install Django Dependencies
         run: |
@@ -43,11 +53,6 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Run Django Tests
-        env:
-          DB_HOST: localhost
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: postgres
         run: |
           cd django-service
           python manage.py test
@@ -71,7 +76,7 @@ jobs:
           npm run build
 
       # ========================
-      # Docker Build Check
+      # Docker Build
       # ========================
       - name: Build Django Docker Image
         run: docker build -t django-service ./django-service
@@ -81,3 +86,17 @@ jobs:
 
       - name: Build Chat Docker Image
         run: docker build -t chat-service ./chat-service
+
+      # ========================
+      # Deploy to AWS ECR (Only on main branch)
+      # ========================
+      - name: Configure AWS Credentials
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: github.ref == 'refs
