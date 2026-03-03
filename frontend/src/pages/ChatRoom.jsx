@@ -50,7 +50,7 @@ const ChatRoom = () => {
         }
       })
       .catch(e => console.error("Failed to fetch room", e));
-  }, [roomId, token]);
+  }, [roomId, token, user.id]);
 
   useEffect(() => {
     // Load old messages
@@ -72,19 +72,6 @@ const ChatRoom = () => {
       console.error("❌ No JWT token found");
       return;
     }
-
-    const WS_BASE =
-      window.location.protocol === "https:"
-        ? "wss://localhost/api"
-        : "ws://localhost/api";
-    // Note: Checking previous logs or conventions, assuming direct localhost or via gateway.
-    // The previous code had "ws://localhost/ws/chat...", assuming gateway redirects or port 8000 exposed.
-    // Let's stick to previous connection logic but be careful about path.
-    // Original: `${WS_BASE}/ws/chat/${roomId}/?token=${token}`
-    // If "api" is not in base, I should check how it was working.
-    // Previous working code: 
-    // const WS_BASE = window.location.protocol === "https:" ? "wss://localhost" : "ws://localhost";
-    // socketRef.current = new WebSocket(`${WS_BASE}/ws/chat/${roomId}/?token=${token}`);
 
     const WS_URL_BASE = window.location.protocol === "https:" ? "wss://localhost" : "ws://localhost";
 

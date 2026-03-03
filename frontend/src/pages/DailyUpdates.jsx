@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/Api";
-import { ArrowRight, Sparkles, PenTool, Image as ImageIcon, Search, ChevronRight, Clock, User, Bookmark } from "lucide-react";
+import { ArrowRight, Sparkles, PenTool, Image as ImageIcon, Search, Clock, Bookmark } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const DailyUpdates = () => {
@@ -130,8 +130,8 @@ const DailyUpdates = () => {
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
                                 className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${activeCategory === cat
-                                        ? "bg-slate-800 text-white shadow-md scale-105"
-                                        : "bg-white text-slate-600 border border-slate-200 hover:border-sky-300 hover:bg-sky-50"
+                                    ? "bg-slate-800 text-white shadow-md scale-105"
+                                    : "bg-white text-slate-600 border border-slate-200 hover:border-sky-300 hover:bg-sky-50"
                                     }`}
                             >
                                 {cat}
