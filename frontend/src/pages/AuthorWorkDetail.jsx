@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/Api";
-import { ArrowLeft, User, Calendar, BookOpen, Sparkles } from "lucide-react";
+import { ArrowLeft, Calendar, BookOpen, Sparkles } from "lucide-react";
 
 const AuthorWorkDetail = () => {
     const { id } = useParams();

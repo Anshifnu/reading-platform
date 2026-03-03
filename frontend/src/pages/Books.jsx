@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import api from "../services/Api";
 import { useAuth } from "../context/AuthContext";
-import { ChevronLeft, ChevronRight, BookOpen, Search, Grid, MapPin, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Search, MapPin, CheckCircle2 } from "lucide-react";
 import Chatbot from "../components/Chatbot";
 
 const Books = () => {
@@ -11,11 +11,9 @@ const Books = () => {
   const { user } = useAuth();
 
   const [books, setBooks] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const bookSliderRefs = useRef({});
-  const categorySliderRef = useRef(null);
 
   const params = new URLSearchParams(location.search);
   const categoryFromUrl = params.get("category");
@@ -24,8 +22,8 @@ const Books = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // eslint-disable-next-line no-unused-vars
         const catRes = await api.get("/categories/");
-        setCategories(catRes.data);
 
         let url = "/books/";
         const queryParams = [];

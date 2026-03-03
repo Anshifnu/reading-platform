@@ -7,7 +7,6 @@ import {
   Play,
   Square,
   Volume2,
-  Languages,
   MoreHorizontal,
   Check,
   Plus,
@@ -23,7 +22,6 @@ const BookDetail = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
-  const [showAllFeedbacks, setShowAllFeedbacks] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
   const [speechLang, setSpeechLang] = useState(null);

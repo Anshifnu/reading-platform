@@ -44,7 +44,7 @@ const ChatList = () => {
         console.error("Failed to fetch rooms", err);
         setLoading(false);
       });
-  }, []);
+  }, [user.id]);
 
   useEffect(() => {
     if (!search) {

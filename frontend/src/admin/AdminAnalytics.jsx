@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
     Users, BookOpen, Star, CreditCard,
-    TrendingUp, RefreshCw, BarChart2,
+    RefreshCw, BarChart2,
 } from "lucide-react";
 
 // ─── Color palette ──────────────────────────────────────

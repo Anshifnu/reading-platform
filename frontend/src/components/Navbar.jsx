@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Bell } from "lucide-react";
 import { useEffect } from "react";
 import api from "../services/Api";
 import { onMessage } from "firebase/messaging";

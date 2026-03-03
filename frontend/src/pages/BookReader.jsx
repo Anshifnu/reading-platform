@@ -22,7 +22,6 @@ const BookReader = () => {
   const [readingPage, setReadingPage] = useState(null);
   const [showBreakOverlay, setShowBreakOverlay] = useState(false);
   const [breakMessage, setBreakMessage] = useState("");
-  const [forceExit, setForceExit] = useState(false);
 
 
   useEffect(() => {
@@ -48,7 +47,6 @@ const BookReader = () => {
       setBreakMessage(
         "👀 Continuous screen reading for long hours may affect your eyes.\n\nWe will navigate you to Home. Please take a proper break."
       );
-      setForceExit(true);          // 👈 mark as final
       setShowBreakOverlay(true);   // 👈 show overlay
     }, TEN_HOURS);
 

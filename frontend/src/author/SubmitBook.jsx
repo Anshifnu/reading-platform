@@ -40,28 +40,25 @@ const SubmitBook = () => {
 
     // Debounced category duplicate check
     const checkCategoryExists = useCallback(
-        (() => {
-            let timer;
-            return (name) => {
-                clearTimeout(timer);
-                if (!name || name.trim().length < 2) {
-                    setCategoryWarning(null);
-                    return;
-                }
-                timer = setTimeout(async () => {
-                    try {
-                        const res = await api.get(`categories/check/?name=${encodeURIComponent(name.trim())}`);
-                        if (res.data.exists) {
-                            setCategoryWarning(`Category "${res.data.match.name}" already exists. Please select it from the dropdown.`);
-                        } else {
-                            setCategoryWarning(null);
-                        }
-                    } catch {
+        (name) => {
+            // simplified debounce or let's just make it a normal function to fix the hook error.
+            if (!name || name.trim().length < 2) {
+                setCategoryWarning(null);
+                return;
+            }
+            setTimeout(async () => {
+                try {
+                    const res = await api.get(`categories/check/?name=${encodeURIComponent(name.trim())}`);
+                    if (res.data.exists) {
+                        setCategoryWarning(`Category "${res.data.match.name}" already exists. Please select it from the dropdown.`);
+                    } else {
                         setCategoryWarning(null);
                     }
-                }, 500);
-            };
-        })(),
+                } catch {
+                    setCategoryWarning(null);
+                }
+            }, 500);
+        },
         []
     );
 

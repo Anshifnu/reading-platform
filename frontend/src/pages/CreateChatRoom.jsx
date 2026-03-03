@@ -4,7 +4,7 @@ import api from "../services/Api";
 const CreateChatRoom = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const [senderRole, setSenderRole] = useState(user?.role || "reader");
+  const [senderRole] = useState(user?.role || "reader");
   const [receiverId, setReceiverId] = useState("");
   const [receiverRole, setReceiverRole] = useState("author");
   const [error, setError] = useState("");
