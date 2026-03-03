@@ -1,0 +1,12 @@
+Django==4.2.10
+djangorestframework
+channels
+channels-redis
+daphne
+psycopg2-binary
+requests
+djangorestframework-simplejwt
+django-cors-headers
+redis
+pyjwt
+

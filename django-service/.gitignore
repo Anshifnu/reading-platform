@@ -1,0 +1,30 @@
+# Environments
+.env
+.env.*
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media files
+media/
+media
+
+# Static files
+staticfiles/
+static/
+
+# IDEs
+.idea/
+.vscode/

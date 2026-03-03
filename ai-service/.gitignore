@@ -1,0 +1,15 @@
+# Environments
+.env
+.env.*
+.venv
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# HuggingFace Cache
+.cache/huggingface/

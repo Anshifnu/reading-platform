@@ -1,0 +1,204 @@
+
+
+services:
+  # ==========================================
+  # GATEWAY SERVICE (Nginx)
+  # ==========================================
+  gateway:
+    build: 
+      context: ./nginx
+    container_name: booksphere_gateway
+    ports:
+      - "80:80"
+    depends_on:
+      - django_app
+      - chat_service_web
+      - ai_service_app
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # CORE BACKEND SERVICE (Django)
+  # ==========================================
+  django_app:
+    build: 
+      context: ./django-service
+    container_name: django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./django-service:/app
+      - ./django-service/media:/app/media
+    env_file:
+      - ./django-service/.env
+    environment:
+      - DB_HOST=postgres_db
+    depends_on:
+      - postgres_db
+    networks:
+      booksphere-network:
+        aliases:
+          - django-backend
+
+  postgres_db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: booksphere
+      POSTGRES_USER: booksphere_user
+      POSTGRES_PASSWORD: booksphere_pass
+    volumes:
+      - core_postgres_data:/var/lib/postgresql/data
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # CELERY REDIS (FOR DJANGO SUBSCRIPTIONS)
+  # ==========================================
+  celery_redis:
+    image: redis:7-alpine
+    container_name: celery_redis
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # CELERY WORKER (Django background tasks)
+  # ==========================================
+  celery_worker:
+    build:
+      context: ./django-service
+    container_name: celery_worker
+    command: celery -A Managmet worker -l info
+    volumes:
+      - ./django-service:/app
+    env_file:
+      - ./django-service/.env
+    environment:
+      - DB_HOST=postgres_db
+    depends_on:
+      - django_app
+      - celery_redis
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # CELERY BEAT (Scheduler)
+  # ==========================================
+  celery_beat:
+    build:
+      context: ./django-service
+    container_name: celery_beat
+    command: celery -A Managmet beat -l info
+    volumes:
+      - ./django-service:/app
+    env_file:
+      - ./django-service/.env
+    environment:
+      - DB_HOST=postgres_db
+    depends_on:
+      - django_app
+      - celery_redis
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # FLOWER (Celery Monitoring Dashboard)
+  # ==========================================
+  flower:
+    build:
+      context: ./django-service
+    container_name: flower
+    command: celery -A Managmet flower --port=5555
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./django-service:/app
+    env_file:
+      - ./django-service/.env
+    environment:
+      - DB_HOST=postgres_db
+    depends_on:
+      - celery_redis
+      - celery_worker
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # CHAT SERVICE (Django Channels)
+  # ==========================================
+  chat_service_web:
+    build: 
+      context: ./chat-service
+    container_name: chat_service_web
+    ports:
+      - "8001:8000"
+    command: daphne -b 0.0.0.0 -p 8000 chat_service.asgi:application
+    volumes:
+      - ./chat-service:/app
+    env_file:
+      - ./chat-service/.env
+    environment:
+      - POSTGRES_HOST=chat_service_db
+      - REDIS_HOST=chat_service_redis
+    depends_on:
+      - chat_service_db
+      - chat_service_redis
+    networks:
+      - booksphere-network
+
+  chat_service_db:
+    image: postgres:15
+    container_name: chat_service_db
+    environment:
+      POSTGRES_DB: chatdb
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+    volumes:
+      - chat_postgres_data:/var/lib/postgresql/data
+    networks:
+      - booksphere-network
+
+  chat_service_redis:
+    image: redis:7
+    container_name: chat_service_redis
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # AI SERVICE
+  # ==========================================
+  ai_service_app:
+    build: 
+      context: ./ai-service
+    container_name: ai_service_app
+    env_file:
+      - ./ai-service/.env
+    environment:
+      - DJANGO_API_BASE=http://django-backend:8000/api
+      - MONGO_URI=mongodb://mongo_db:27017
+    volumes:
+      - ./ai-service:/app
+    depends_on:
+      - mongo_db
+    networks:
+      - booksphere-network
+
+  # ==========================================
+  # MONGODB (AI Agent Cache)
+  # ==========================================
+  mongo_db:
+    image: mongo:7
+    container_name: mongo_db
+    volumes:
+      - ai_mongo_data:/data/db
+    networks:
+      - booksphere-network
+
+volumes:
+  core_postgres_data:
+  chat_postgres_data:
+  ai_mongo_data:
+
+networks:
+  booksphere-network:
+    name: booksphere-network
+    driver: bridge

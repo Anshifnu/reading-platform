@@ -1,0 +1,28 @@
+# Global Ignores
+.env
+.env.*
+.DS_Store
+
+# Node/Frontend
+node_modules/
+build/
+coverage/
+
+# Python/Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+db.sqlite3
+media/
+venv/
+env/
+.venv/
+serviceAccountKey.json
+
+# AI Models (Sentence Transformers FAISS etc)
+.cache/
+
+# IDE/Editor
+.vscode/
+.idea/
