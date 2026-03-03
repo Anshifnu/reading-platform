@@ -1,0 +1,63 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ========================
+      # Backend - Django
+      # ========================
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Django Dependencies
+        run: |
+          cd django-service
+          pip install -r requirements.txt
+
+      - name: Run Django Tests
+        run: |
+          cd django-service
+          python manage.py test
+
+      # ========================
+      # Frontend - React
+      # ========================
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
+
+      # ========================
+      # Docker Build Check
+      # ========================
+      - name: Build Django Docker Image
+        run: docker build -t django-service ./django-service
+
+      - name: Build AI Docker Image
+        run: docker build -t ai-service ./ai-service
+
+      - name: Build Chat Docker Image
+        run: docker build -t chat-service ./chat-service
