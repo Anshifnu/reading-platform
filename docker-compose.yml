@@ -30,8 +30,8 @@ services:
       - ./django-service/media:/app/media
     env_file:
       - ./django-service/.env
-    environment:
-      - DB_HOST=postgres_db
+    # environment:
+    #   - DB_HOST=postgres_db
     depends_on:
       - postgres_db
     networks:
@@ -72,8 +72,8 @@ services:
       - ./django-service:/app
     env_file:
       - ./django-service/.env
-    environment:
-      - DB_HOST=postgres_db
+    # environment:
+    #   - DB_HOST=postgres_db
     depends_on:
       - django_app
       - celery_redis
@@ -92,8 +92,8 @@ services:
       - ./django-service:/app
     env_file:
       - ./django-service/.env
-    environment:
-      - DB_HOST=postgres_db
+    # environment:
+    #   - DB_HOST=postgres_db
     depends_on:
       - django_app
       - celery_redis
@@ -114,8 +114,8 @@ services:
       - ./django-service:/app
     env_file:
       - ./django-service/.env
-    environment:
-      - DB_HOST=postgres_db
+    # environment:
+    #   - DB_HOST=postgres_db
     depends_on:
       - celery_redis
       - celery_worker
@@ -137,7 +137,7 @@ services:
     env_file:
       - ./chat-service/.env
     environment:
-      - POSTGRES_HOST=chat_service_db
+      # - POSTGRES_HOST=chat_service_db
       - REDIS_HOST=chat_service_redis
     depends_on:
       - chat_service_db
