@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-nginx-config
+data:
+  nginx.conf: |
+    events {}
+    
+    http {
+        upstream core_backend {
+            server django-backend:8000;
+        }
+    
+        upstream chat_service {
+            server chat-service-web:8000;
+        }
+    
+        upstream ai_service {
+            server ai-service-app:8001;
+        }
+    
+        server {
+            listen 80;
+    
+            # Chat Service Routing (WebSocket & API)
+            location /ws/chat/ {
+                proxy_pass http://chat_service;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+    
+            location /api/chat/ {
+                proxy_pass http://chat_service;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+    
+            # AI Service Routing
+            location /api/ai/ {
+                rewrite ^/api(.*)$ $1 break;
+                proxy_pass http://ai_service;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+    
+            # Media Files (Proxy to Django for now as it handles serving in DEV)
+            location /media/ {
+                proxy_pass http://core_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+    
+            # Core Backend (Default)
+            location / {
+                proxy_pass http://core_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booksphere-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: booksphere-gateway
+  template:
+    metadata:
+      labels:
+        app: booksphere-gateway
+    spec:
+      containers:
+        - name: gateway
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: gateway-nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booksphere-gateway
+spec:
+  type: LoadBalancer
+  selector:
+    app: booksphere-gateway
+  ports:
+    - port: 80
+      targetPort: 80

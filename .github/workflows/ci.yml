@@ -116,3 +116,22 @@ jobs:
           
           docker tag chat-service:latest $ECR_REGISTRY/chat-service:latest
           docker push $ECR_REGISTRY/chat-service:latest
+
+      # ========================
+      # Continuous Deployment (CD) to Amazon EKS
+      # ========================
+      - name: Update Kubeconfig
+        if: github.ref == 'refs/heads/main'
+        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Deploy to EKS
+        if: github.ref == 'refs/heads/main'
+        run: |
+          kubectl rollout restart deployment django-app
+          kubectl rollout restart deployment ai-service-app
+          kubectl rollout restart deployment chat-service-web
+          kubectl rollout restart deployment celery-worker
+          kubectl rollout restart deployment celery-beat
+          kubectl rollout restart deployment flower-dashboard
+          
+          kubectl rollout status deployment django-app
