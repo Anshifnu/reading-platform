@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-service-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chat-service-web
+  template:
+    metadata:
+      labels:
+        app: chat-service-web
+    spec:
+      containers:
+        - name: chat-service-web
+          image: 420905172819.dkr.ecr.ap-south-1.amazonaws.com/chat-service:latest
+          command: ["sh", "-c", "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 chat_service.asgi:application"]
+          envFrom:
+            - secretRef:
+                name: chat-secret
+          env:
+            - name: REDIS_HOST
+              value: "chat-service-redis"
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-service-web
+spec:
+  selector:
+    app: chat-service-web
+  ports:
+    - port: 8000
+      targetPort: 8000
