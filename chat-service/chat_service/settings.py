@@ -172,6 +172,9 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://raedbook.xyz",
+    "https://www.raedbook.xyz",
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
