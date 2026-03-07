@@ -73,7 +73,8 @@ const ChatRoom = () => {
       return;
     }
 
-    const WS_URL_BASE = window.location.protocol === "https:" ? "wss://localhost" : "ws://localhost";
+    const apiBase = process.env.REACT_APP_API_URL || window.location.origin;
+    const WS_URL_BASE = apiBase.replace(/^http/, "ws");
 
     socketRef.current = new WebSocket(
       `${WS_URL_BASE}/ws/chat/${roomId}/?token=${token}`
@@ -237,10 +238,10 @@ const ChatRoom = () => {
                       if (!mediaUrl.startsWith("http") && !mediaUrl.startsWith("/media")) {
                         // It's likely just a filename from WebSocket immediate echo
                         // or a relative path without /media/
-                        mediaUrl = `http://localhost:8001/media/chat_attachments/${mediaUrl}`;
+                        mediaUrl = `${process.env.REACT_APP_API_URL || ""}/media/chat_attachments/${mediaUrl}`;
                       } else if (mediaUrl.startsWith("/media")) {
                         // From API, it has /media/ prefix but needs domain
-                        mediaUrl = `http://localhost:8001${mediaUrl}`;
+                        mediaUrl = `${process.env.REACT_APP_API_URL || ""}${mediaUrl}`;
                       }
 
                       return m.message_type === "video" ? (
