@@ -22,8 +22,8 @@ class ForgotPasswordTests(APITestCase):
         )
 
     # ✅ 1. Forgot Password Request
-    @patch("Accounts.views.send_mail")
-    def test_forgot_password_success(self, mock_send_mail):
+    @patch("Accounts.views.send_sqs_email")
+    def test_forgot_password_success(self, mock_send_sqs_email):
         response = self.client.post(self.forgot_url, {"email": self.user.email})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -32,7 +32,7 @@ class ForgotPasswordTests(APITestCase):
         reset_token = response.data["reset_token"]
         self.assertIsNotNone(cache.get(f"fp_otp_{reset_token}"))
         self.assertEqual(cache.get(f"fp_email_{reset_token}"), self.user.email)
-        mock_send_mail.assert_called_once()
+        mock_send_sqs_email.assert_called_once()
 
     def test_forgot_password_unregistered(self):
         response = self.client.post(self.forgot_url, {"email": "unknown@gmail.com"})

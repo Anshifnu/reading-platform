@@ -14,8 +14,8 @@ class EmailRegisterTests(APITestCase):
     def setUp(self):
         self.url = reverse("register")  
 
-    @patch("Accounts.views.sqs.send_message")
-    def test_email_register_success(self, mock_send_message):
+    @patch("Accounts.views.send_sqs_email")
+    def test_email_register_success(self, mock_send_sqs_email):
 
         data = {
             "email": "test@gmail.com",
@@ -42,7 +42,7 @@ class EmailRegisterTests(APITestCase):
         self.assertEqual(cached_data["email"], data["email"])
 
         # ✅ 4. Check SQS called
-        mock_send_message.assert_called_once()
+        mock_send_sqs_email.assert_called_once()
 
 
 
@@ -176,8 +176,8 @@ class ResendEmailOTPTests(APITestCase):
             "resend_count": 0
         }
 
-    @patch("Accounts.views.send_mail")
-    def test_resend_email_otp_success(self, mock_send_mail):
+    @patch("Accounts.views.send_sqs_email")
+    def test_resend_email_otp_success(self, mock_send_sqs_email):
         cache.set(self.registration_id, self.cached_data, timeout=300)
 
         data = {
@@ -192,7 +192,7 @@ class ResendEmailOTPTests(APITestCase):
         updated_cache = cache.get(self.registration_id)
         self.assertEqual(updated_cache["resend_count"], 1)
 
-        mock_send_mail.assert_called_once()
+        mock_send_sqs_email.assert_called_once()
 
 
     def test_resend_email_otp_limit_exceeded(self):

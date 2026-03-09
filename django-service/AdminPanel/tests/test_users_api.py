@@ -46,7 +46,8 @@ class AdminUserManagementTests(APITestCase):
         response = self.client.get("/api/admin/users/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_block_user(self):
+    @patch("AdminPanel.views.send_sqs_email")
+    def test_block_user(self, mock_send_sqs_email):
         mail.outbox.clear()
         self.client.force_authenticate(user=self.admin)
         response = self.client.post(f"/api/admin/users/{self.reader.id}/block/", {"block": True, "reason": "Spamming"}, format="json")
@@ -74,7 +75,8 @@ class AdminUserManagementTests(APITestCase):
         self.reader.refresh_from_db()
         self.assertTrue(self.reader.is_active)
 
-    def test_change_user_role(self):
+    @patch("AdminPanel.views.send_sqs_email")
+    def test_change_user_role(self, mock_send_sqs_email):
         mail.outbox.clear()
         self.client.force_authenticate(user=self.admin)
         response = self.client.post(f"/api/admin/users/{self.reader.id}/change-role/", {"new_role": "author", "reason": "Requested"}, format="json")
