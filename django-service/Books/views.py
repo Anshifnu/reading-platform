@@ -494,19 +494,19 @@ class TelegramWebhookView(APIView):
                     
                     if pdf_url.startswith('http'):
                         try:
-                            # 1. Fetch the PDF directly into memory
-                            pdf_response = requests.get(pdf_url, stream=True)
-                            if pdf_response.status_code == 200:
-                                # 2. Send it natively to Telegram as a document
-                                files = {'document': (f"{book.title}.pdf", pdf_response.content, 'application/pdf')}
-                                data = {'chat_id': chat_id, 'caption': f"Here is your book: {book.title} 📚"}
-                                res = requests.post(send_doc_url, data=data, files=files)
-                                print("SEND DOC RESPONSE:", res.text)
+                            # 1. Send the URL natively to Telegram as a document
+                            # This avoids downloading large PDFs into the Django server's RAM
+                            data = {'chat_id': chat_id, 'document': pdf_url, 'caption': f"Here is your book: {book.title} 📚"}
+                            res = requests.post(send_doc_url, json=data)
+                            res_json = res.json()
+                            
+                            if res_json.get("ok"):
+                                print("SEND DOC RESPONSE: SUCCESS")
                             else:
-                                print(f"FAILED TO DOWNLOAD PDF: {pdf_response.status_code}")
+                                print(f"TELEGRAM FAILED TO DOWNLOAD PDF: {res.text}")
                                 requests.post(send_msg_url, json={
                                     "chat_id": chat_id,
-                                    "text": f"Sorry, could not download '{book.title}' from the cloud storage."
+                                    "text": f"Sorry, could not download '{book.title}' from the cloud storage. Cloudinary security settings may be blocking it."
                                 })
                         except Exception as e:
                             print(f"ERROR DOWNLOADING/SENDING PDF: {e}")
