@@ -1,9 +1,33 @@
 import random
+import boto3
+import json
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.conf import settings
 
 OTP_TTL = 60  # 1 minute
+
+def send_sqs_email(email, subject, message):
+    """
+    Sends a generic email by placing it onto the AWS SQS Queue.
+    The AWS Lambda worker will process this and send it via SES.
+    """
+    sqs = boto3.client(
+        "sqs",
+        region_name="ap-south-1",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+    
+    payload = {
+        "email": email,
+        "subject": subject,
+        "message": message
+    }
+    
+    sqs.send_message(
+        QueueUrl=settings.AWS_SQS_QUEUE_URL,
+        MessageBody=json.dumps(payload)
+    )
 
 
 def generate_otp():
@@ -27,10 +51,6 @@ def delete_otp(email):
 
 
 def send_otp_email(email, otp):
-    send_mail(
-        subject="Your Login OTP",
-        message=f"Your OTP is {otp}. It expires in 1 minute.",
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[email],
-        fail_silently=False,
-    )
+    subject = "Your Login OTP"
+    message = f"Your OTP is {otp}. It expires in 1 minute."
+    send_sqs_email(email, subject, message)

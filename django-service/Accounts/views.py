@@ -1,8 +1,6 @@
 import uuid, random
-import boto3
 import json
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,16 +23,8 @@ from .utils import (
     delete_otp,
     send_otp_email,
     get_otp,
+    send_sqs_email,
 )
-
-sqs = boto3.client(
-    "sqs",
-    region_name="ap-south-1",
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-)
-
-QUEUE_URL = settings.AWS_SQS_QUEUE_URL
 
 from django.contrib.auth import get_user_model
 User=get_user_model()
@@ -60,16 +50,10 @@ class EmailRegister(APIView):
             timeout=300
         )
 
-        # ✅ SEND TO SQS INSTEAD OF EMAIL
-        message = {
-            "email": serializer.validated_data["email"],
-            "otp": otp
-        }
-
-        sqs.send_message(
-            QueueUrl=QUEUE_URL,
-            MessageBody=json.dumps(message)
-        )
+        # ✅ SEND TO SQS (USING NEW GENERIC METHOD)
+        subject = "Your BookSphere Registration OTP"
+        message_body = f"Your registration OTP is {otp}. It expires in a few minutes."
+        send_sqs_email(serializer.validated_data["email"], subject, message_body)
 
         return Response(
             {
@@ -210,12 +194,9 @@ class ResendEmailOTP(APIView):
 
         cache.set(registration_id, cached_data)  
 
-        send_mail(
-            "Verify your email",
-            f"Your new OTP is {new_otp}",
-            settings.EMAIL_HOST_USER,
-            [cached_data["email"]],
-        )
+        subject = "Verify your email"
+        body = f"Your new OTP is {new_otp}"
+        send_sqs_email(cached_data["email"], subject, body)
 
         return Response(
             {"message": "OTP resent successfully"},
@@ -377,12 +358,9 @@ class ForgotPasswordView(APIView):
         cache.set(f"fp_email_{reset_token}", email, timeout=600)
         cache.set(f"fp_otp_{reset_token}", otp, timeout=300)
 
-        send_mail(
-            subject="Password Reset OTP",
-            message=f"Your OTP is {otp}",
-            from_email="noreply@yourapp.com",
-            recipient_list=[email],
-        )
+        subject = "Password Reset OTP"
+        body = f"Your OTP for password reset is {otp}"
+        send_sqs_email(email, subject, body)
 
         return Response({
             "message": "OTP sent",

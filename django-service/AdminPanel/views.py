@@ -3,8 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from django.conf import settings
+from Accounts.utils import send_sqs_email
 from django.db.models import Q
 
 from .serializers import AdminUserListSerializer
@@ -94,13 +93,7 @@ class AdminBlockUserView(APIView):
                 f"If you believe this is a mistake, please contact our support team.\n\n"
                 f"Best regards,\nBookSphere Team"
             )
-            send_mail(
-                subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=True,
-            )
+            send_sqs_email(user.email, subject, message)
         except Exception as e:
             print(f"⚠️ Failed to send block email: {e}")
 
@@ -168,13 +161,7 @@ class AdminChangeRoleView(APIView):
                 f"to see the updated permissions.\n\n"
                 f"Best regards,\nBookSphere Team"
             )
-            send_mail(
-                subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=True,
-            )
+            send_sqs_email(user.email, subject, message)
         except Exception as e:
             print(f"⚠️ Failed to send role change email: {e}")
 

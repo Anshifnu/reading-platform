@@ -7,8 +7,7 @@ from .models import UserSubscription
 from Notifications.models import Notification  # 👈 IMPORT HERE
 
 User = get_user_model()
-from django.core.mail import send_mail
-from django.conf import settings
+from Accounts.utils import send_sqs_email
 
 @shared_task
 def handle_subscription_expiry():
@@ -32,18 +31,14 @@ def handle_subscription_expiry():
             message="Your subscription will expire tomorrow. Renew now to avoid interruption."
         )
 
-        send_mail(
-            subject="⏰ Your subscription expires tomorrow",
-            message=(
-                f"Hi {user.username},\n\n"
-                "Your subscription will expire tomorrow.\n"
-                "Renew now to avoid losing access.\n\n"
-                "— BookSphere Team"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
+        subject = "⏰ Your subscription expires tomorrow"
+        body = (
+            f"Hi {user.username},\n\n"
+            "Your subscription will expire tomorrow.\n"
+            "Renew now to avoid losing access.\n\n"
+            "— BookSphere Team"
         )
+        send_sqs_email(user.email, subject, body)
     # ❌ SUBSCRIPTION EXPIRED
     expired_subs = UserSubscription.objects.filter(
         end_date__lt=timezone.now(),
@@ -67,16 +62,12 @@ def handle_subscription_expiry():
             message="Your subscription has expired. Renew to regain access."
         )
 
-        send_mail(
-            subject="❌ Subscription expired",
-            message=(
-                f"Hi {user.username},\n\n"
-                "Your subscription has expired.\n"
-                "Please renew to continue enjoying premium features.\n\n"
-                "— BookSphere Team"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
+        subject = "❌ Subscription expired"
+        body = (
+            f"Hi {user.username},\n\n"
+            "Your subscription has expired.\n"
+            "Please renew to continue enjoying premium features.\n\n"
+            "— BookSphere Team"
         )
+        send_sqs_email(user.email, subject, body)
 
