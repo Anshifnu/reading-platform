@@ -178,8 +178,8 @@ const AdminBookVerification = () => {
                             {/* AI Duplicate Check */}
                             {verificationReport?.duplicate_check && (
                                 <div className={`p-4 rounded-lg border-l-4 ${verificationReport.duplicate_check.is_duplicate
-                                        ? 'bg-red-50 border-red-500'
-                                        : 'bg-green-50 border-green-500'
+                                    ? 'bg-red-50 border-red-500'
+                                    : 'bg-green-50 border-green-500'
                                     }`}>
                                     <h4 className="font-semibold text-gray-700 mb-1">
                                         {verificationReport.duplicate_check.is_duplicate ? '🔴' : '✅'} Duplicate Check
@@ -307,6 +307,14 @@ const AdminBookVerification = () => {
                                         className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 flex items-center justify-center gap-2"
                                     >
                                         <Check size={18} /> Approve & Publish
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleVerify(selectedSubmission.id)}
+                                        disabled={actionLoading}
+                                        className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 flex items-center justify-center gap-2"
+                                    >
+                                        <Search size={18} /> Re-verify AI
                                     </button>
 
                                     <div className="flex-1 flex gap-2">

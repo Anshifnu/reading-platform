@@ -15,6 +15,7 @@ spec:
       containers:
         - name: django-app
           image: 420905172819.dkr.ecr.ap-south-1.amazonaws.com/django-service:latest
+          imagePullPolicy: Always
           # In production, recommend using Gunicorn instead of runserver
           command: ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
           envFrom:
