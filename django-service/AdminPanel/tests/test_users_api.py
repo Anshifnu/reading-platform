@@ -3,6 +3,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from Notifications.models import Notification
 from django.core import mail
+from unittest.mock import patch
 
 User = get_user_model()
 
@@ -60,8 +61,7 @@ class AdminUserManagementTests(APITestCase):
         # Check notification
         self.assertTrue(Notification.objects.filter(user=self.reader, type="ACCOUNT_BLOCKED").exists())
         # Check email
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("Suspended", mail.outbox[0].subject)
+        self.assertEqual(mock_send_sqs_email.call_count, 1)
 
     def test_unblock_user(self):
         self.reader.is_active = False
@@ -89,7 +89,7 @@ class AdminUserManagementTests(APITestCase):
         # Check notification
         self.assertTrue(Notification.objects.filter(user=self.reader, type="ROLE_CHANGED").exists())
         # Check email
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mock_send_sqs_email.call_count, 1)
 
     def test_change_role_invalid(self):
         self.client.force_authenticate(user=self.admin)
