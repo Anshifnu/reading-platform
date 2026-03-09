@@ -2,7 +2,7 @@ import requests
 from Books.models import Book
 
 
-AI_SERVICE_URL = "http://ai_service_app:8001/ai/verify-book"
+AI_SERVICE_URL = "http://ai-service-app:8001/ai/verify-book"
 
 
 class AIVerifier:
